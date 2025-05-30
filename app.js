@@ -9,6 +9,7 @@ app.use(express.json());
 
 connectToDatabase();
 
+app.use('/api/books', require('./routes/books'));
 
 app.get('/', (req, res) => {
     res.send("Main page");
