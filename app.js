@@ -7,6 +7,9 @@ const app = express();
 
 app.use(express.json());
 
+const cors = require("cors");
+app.use(cors());
+
 connectToDatabase();
 
 app.use('/api/books', require('./routes/books'));
