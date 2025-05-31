@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectToDatabase = require('./database');
+const authRoutes = require("./routes/auth");
+
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -12,6 +14,8 @@ app.use(express.json());
 connectToDatabase();
 
 app.use('/api/books', require('./routes/books'));
+app.use("/api/auth", authRoutes);
+
 
 app.get('/', (req, res) => {
     res.send("Main page");
