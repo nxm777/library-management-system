@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getBooks, deleteBook } from "../services/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 function Home() {
   const [books, setBooks] = useState([]);
@@ -13,6 +13,8 @@ function Home() {
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
 
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
 
   const fetchBooks = async () => {
     try {
@@ -32,8 +34,10 @@ function Home() {
   };
 
   useEffect(() => {
-    fetchBooks();
-  }, [sort, author, genre, page, limit]);
+    if (isLoggedIn) {
+      fetchBooks();
+    }
+  }, [sort, author, genre, page, limit, isLoggedIn]);
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this book?");
@@ -47,6 +51,22 @@ function Home() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  };
+if (!isLoggedIn) {
+  return (
+    <div className="container py-4">
+      <h2>Welcome to the Library App</h2>
+      <p>
+        This service allows you to manage your personal book collection – add, edit, delete and organize your favorite books by author, genre, or year.
+        <br />
+        To get started, please <Link to="/login">log in</Link> or <Link to="/register">create an account</Link>.
+      </p>
+    </div>
+  );
+}
   return (
     <div className="container py-4">
       <h1 className="mb-4">Book List</h1>
@@ -81,38 +101,36 @@ function Home() {
       </div>
 
       {/* Book List */}
-     <ul className="list-group mb-3">
-  {books.map((book) => (
-    <li key={book._id} className="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        <b>{book.title}</b> — {book.author.last_name}, {book.publicationYear}
-      </div>
-      <div>
-        {confirmingDeleteId === book._id ? (
-          <>
-            <button
-              className="btn btn-sm btn-danger me-2"
-              onClick={async () => {
-                await handleDelete(book._id);
-                setConfirmingDeleteId(null);
-              }}
-            >
-              Confirm Delete
-            </button>
-            <button className="btn btn-sm btn-secondary" onClick={() => setConfirmingDeleteId(null)}>
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="btn btn-sm btn-warning me-2" onClick={() => navigate(`/edit/${book._id}`)}>Edit</button>
-            <button className="btn btn-sm btn-danger" onClick={() => setConfirmingDeleteId(book._id)}>Delete</button>
-          </>
-        )}
-      </div>
-    </li>
-  ))}
-</ul>
+      <ul className="list-group mb-3">
+        {books.map((book) => (
+          <li key={book._id} className="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <b>{book.title}</b> — {book.author.last_name}, {book.publicationYear}
+            </div>
+            <div>
+              {confirmingDeleteId === book._id ? (
+                <>
+                  <button className="btn btn-sm btn-danger me-2" onClick={async () => {
+                    await handleDelete(book._id);
+                    setConfirmingDeleteId(null);
+                  }}>
+                    Confirm Delete
+                  </button>
+                  <button className="btn btn-sm btn-secondary" onClick={() => setConfirmingDeleteId(null)}>
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-sm btn-warning me-2" onClick={() => navigate(`/edit/${book._id}`)}>Edit</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => setConfirmingDeleteId(book._id)}>Delete</button>
+                </>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+
       {/* Pagination */}
       <div className="d-flex justify-content-between align-items-center">
         <button className="btn btn-secondary" onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>
