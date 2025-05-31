@@ -11,9 +11,12 @@ function Home() {
   const [limit, setLimit] = useState(4);
   const [totalPages, setTotalPages] = useState(1);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+  const [message, setMessage] = useState("");
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const firstName = localStorage.getItem("firstName");
+  const lastName = localStorage.getItem("lastName");
   const isLoggedIn = !!token;
 
   const fetchBooks = async () => {
@@ -40,36 +43,41 @@ function Home() {
   }, [sort, author, genre, page, limit, isLoggedIn]);
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this book?");
-    if (!confirmDelete) return;
-
     try {
       await deleteBook(id);
+      setMessage("Book deleted successfully");
       fetchBooks();
     } catch (err) {
-      console.error("Delete error", err);
+      setMessage("Error deleting book");
+    } finally {
+      setConfirmingDeleteId(null);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.clear();
     window.location.href = "/";
   };
-if (!isLoggedIn) {
+
+  if (!isLoggedIn) {
+    return (
+      <div className="container py-4">
+        <h2>Welcome to the Library App</h2>
+        <p>
+          This service allows you to manage your personal book collection – add, edit, delete and organize your favorite books by author, genre, or year.
+          <br />
+          To get started, please <Link to="/login">log in</Link> or <Link to="/register">create an account</Link>.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-4">
-      <h2>Welcome to the Library App</h2>
-      <p>
-        This service allows you to manage your personal book collection – add, edit, delete and organize your favorite books by author, genre, or year.
-        <br />
-        To get started, please <Link to="/login">log in</Link> or <Link to="/register">create an account</Link>.
-      </p>
-    </div>
-  );
-}
-  return (
-    <div className="container py-4">
+      
       <h1 className="mb-4">Book List</h1>
+
+      {message && <div className="alert alert-info">{message}</div>}
 
       {/* Filters */}
       <div className="row mb-3">
@@ -110,10 +118,7 @@ if (!isLoggedIn) {
             <div>
               {confirmingDeleteId === book._id ? (
                 <>
-                  <button className="btn btn-sm btn-danger me-2" onClick={async () => {
-                    await handleDelete(book._id);
-                    setConfirmingDeleteId(null);
-                  }}>
+                  <button className="btn btn-sm btn-danger me-2" onClick={() => handleDelete(book._id)}>
                     Confirm Delete
                   </button>
                   <button className="btn btn-sm btn-secondary" onClick={() => setConfirmingDeleteId(null)}>

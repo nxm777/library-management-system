@@ -10,28 +10,35 @@ function Register() {
     email: "",
     password: ""
   });
-  const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = ({ target }) => {
     setData({ ...data, [target.name]: target.value });
+    setError(""); 
+    setSuccess("");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:8080/api/auth/register", data);
-      alert("Registration successful");
-      navigate("/login");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
-    }
-  };
-
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
+  try {
+    await axios.post("http://localhost:8080/api/auth/register", data);
+    setSuccess("Registration successful! Redirecting to login...");
+    setTimeout(() => navigate("/login"), 1500);
+  } catch (err) {
+    const fullMessage = err.response?.data?.message || "Registration failed";
+    const firstMessage = fullMessage.split(".")[0];
+    setError(firstMessage + ".");
+  }
+};
   return (
     <div className="container py-4">
       <h2>Register</h2>
       {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
       <form onSubmit={handleSubmit}>
         <input name="firstName" className="form-control mb-2" placeholder="First Name" onChange={handleChange} required />
         <input name="lastName" className="form-control mb-2" placeholder="Last Name" onChange={handleChange} required />
