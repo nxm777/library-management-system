@@ -10,6 +10,7 @@ function Home() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(4);
   const [totalPages, setTotalPages] = useState(1);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -35,8 +36,15 @@ function Home() {
   }, [sort, author, genre, page, limit]);
 
   const handleDelete = async (id) => {
-    await deleteBook(id);
-    fetchBooks();
+    const confirmDelete = window.confirm("Are you sure you want to delete this book?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteBook(id);
+      fetchBooks();
+    } catch (err) {
+      console.error("Delete error", err);
+    }
   };
 
   return (
@@ -73,20 +81,38 @@ function Home() {
       </div>
 
       {/* Book List */}
-      <ul className="list-group mb-3">
-        {books.map((book) => (
-          <li key={book._id} className="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <b>{book.title}</b> — {book.author.last_name}, {book.publicationYear}
-            </div>
-            <div>
-              <button className="btn btn-sm btn-warning me-2" onClick={() => navigate(`/edit/${book._id}`)}>Edit</button>
-              <button className="btn btn-sm btn-danger" onClick={() => handleDelete(book._id)}>Delete</button>
-            </div>
-          </li>
-        ))}
-      </ul>
-
+     <ul className="list-group mb-3">
+  {books.map((book) => (
+    <li key={book._id} className="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <b>{book.title}</b> — {book.author.last_name}, {book.publicationYear}
+      </div>
+      <div>
+        {confirmingDeleteId === book._id ? (
+          <>
+            <button
+              className="btn btn-sm btn-danger me-2"
+              onClick={async () => {
+                await handleDelete(book._id);
+                setConfirmingDeleteId(null);
+              }}
+            >
+              Confirm Delete
+            </button>
+            <button className="btn btn-sm btn-secondary" onClick={() => setConfirmingDeleteId(null)}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="btn btn-sm btn-warning me-2" onClick={() => navigate(`/edit/${book._id}`)}>Edit</button>
+            <button className="btn btn-sm btn-danger" onClick={() => setConfirmingDeleteId(book._id)}>Delete</button>
+          </>
+        )}
+      </div>
+    </li>
+  ))}
+</ul>
       {/* Pagination */}
       <div className="d-flex justify-content-between align-items-center">
         <button className="btn btn-secondary" onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>

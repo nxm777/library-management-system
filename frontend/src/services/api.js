@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/books"
+  baseURL: "http://localhost:8080/api/books"
 });
 
 export const getBooks = (query = "") => API.get("/?" + query);

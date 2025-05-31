@@ -1,14 +1,13 @@
 require('dotenv').config();
 const express = require('express');
-const PORT = process.env.PORT;
+const cors = require('cors');
 const connectToDatabase = require('./database');
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 
-app.use(express.json());
-
-const cors = require("cors");
 app.use(cors());
+app.use(express.json());
 
 connectToDatabase();
 
@@ -18,6 +17,10 @@ app.get('/', (req, res) => {
     res.send("Main page");
 });
 
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Test OK' });
+});
+
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-})
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
