@@ -13,6 +13,7 @@ connectToDatabase();
 
 app.use('/api/books', require('./routes/books'));
 app.use("/api/auth", authRoutes);
+app.use("/api/reading-lists", require('./routes/readingLists'));
 
 
 app.get('/', (req, res) => {
